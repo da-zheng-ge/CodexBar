@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodexBar</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main id="bar" class="bar">
+      <section class="player-shell">
+        <span class="brand">Codex</span>
+        <span class="quota">
+          <span class="quota-item">
+            <span class="limit-label">5H</span>
+            <span id="primaryPercent" class="percent">--%</span>
+          </span>
+          <span class="divider">|</span>
+          <span class="quota-item">
+            <span class="limit-label">7D</span>
+            <span id="secondaryPercent" class="percent">--%</span>
+          </span>
+        </span>
+        <div id="statusSlot" class="status-slot" aria-hidden="true">
+          <span id="resetClock" class="reset-clock">--:--</span>
+          <span id="thinkingIndicator" class="thinking">
+            <span></span><span></span><span></span>
+          </span>
+        </div>
+      </section>
+    </main>
+    <script src="./renderer.js"></script>
+  </body>
+</html>
