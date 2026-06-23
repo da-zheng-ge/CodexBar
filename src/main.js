@@ -23,6 +23,7 @@ let devReloadTimer;
 let devReloadWatcher;
 let isRelaunching = false;
 let taskbarAttachMode = 'fallback';
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
 
 class UsageService {
   constructor() {
@@ -693,20 +694,34 @@ function startDevReloadWatcher() {
   });
 }
 
-app.whenReady().then(() => {
-  if (process.platform !== 'win32') {
-    app.quit();
-    return;
-  }
+if (!hasSingleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      return;
+    }
 
-  app.setAppUserModelId('CodexBar');
-  usageService = new UsageService();
-  createWindow();
-  createTray();
-  startTaskbarGuard();
-  startDevReloadWatcher();
-  usageService.start();
-});
+    placeWindow();
+    mainWindow.showInactive();
+    applyNativeWindowBehavior();
+  });
+
+  app.whenReady().then(() => {
+    if (process.platform !== 'win32') {
+      app.quit();
+      return;
+    }
+
+    app.setAppUserModelId('CodexBar');
+    usageService = new UsageService();
+    createWindow();
+    createTray();
+    startTaskbarGuard();
+    startDevReloadWatcher();
+    usageService.start();
+  });
+}
 
 app.on('before-quit', () => {
   clearTimeout(devReloadTimer);

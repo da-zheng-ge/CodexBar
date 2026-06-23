@@ -14,14 +14,14 @@ Open Codex and ask it to download the latest CodexBar build:
 Download the latest portable CodexBar exe from https://github.com/da-zheng-ge/CodexBar/releases/latest and place it on my desktop.
 ```
 
-Then double-click `CodexBar.0.1.0.exe`. The portable build does not require installation.
+Then double-click `CodexBar.x.y.z.exe`. The portable build does not require installation.
 
 ### Option 2: Manual Download
 
 Go to [GitHub Releases](https://github.com/da-zheng-ge/CodexBar/releases/latest) and download the latest Windows build:
 
-- `CodexBar.0.1.0.exe`: portable build, no install required.
-- `CodexBar.Setup.0.1.0.exe`: Windows installer.
+- `CodexBar.x.y.z.exe`: portable build, no install required.
+- `CodexBar.Setup.x.y.z.exe`: Windows installer.
 
 ### Requirements
 

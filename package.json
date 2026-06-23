@@ -1,6 +1,6 @@
 {
   "name": "codexbar",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Windows taskbar quota bar for Codex.",
   "author": "da-zheng-ge",
   "main": "src/main.js",
