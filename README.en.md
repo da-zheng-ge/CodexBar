@@ -61,7 +61,4 @@ npm run dist
 
 ## Behavior
 
-- Compact view: `5H xx% | 7D xx%`
-- Click the bar to expand reset times.
-- Right-click for refresh, reset position, and quit.
-- The app does not read API keys, auth files, prompts, or responses.
+- Right-click for refresh and quit.
