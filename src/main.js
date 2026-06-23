@@ -660,11 +660,11 @@ function createTray() {
   const icon = path.join(__dirname, 'tray.ico');
   tray = fs.existsSync(icon) ? new Tray(icon) : null;
   contextMenu = Menu.buildFromTemplate([
-    { label: 'Refresh', click: () => usageService.refresh() },
+    { label: '刷新', click: () => usageService.refresh() },
     { type: 'separator' },
-    { label: 'Uninstall...', click: () => uninstallApp() },
+    { label: '卸载', click: () => uninstallApp() },
     { type: 'separator' },
-    { label: 'Quit', click: () => app.quit() }
+    { label: '退出', click: () => app.quit() }
   ]);
 
   if (tray) {
@@ -682,12 +682,12 @@ async function uninstallApp() {
 
   const { response } = await dialog.showMessageBox(mainWindow, {
     type: 'warning',
-    buttons: ['Uninstall', 'Cancel'],
+    buttons: ['卸载', '取消'],
     defaultId: 1,
     cancelId: 1,
-    title: 'Uninstall CodexBar',
-    message: 'Uninstall CodexBar?',
-    detail: 'CodexBar will close and start the Windows uninstaller.'
+    title: '卸载 CodexBar',
+    message: '要卸载 CodexBar 吗？',
+    detail: 'CodexBar 将退出，并启动 Windows 卸载程序。'
   });
 
   if (response !== 0) {
@@ -705,8 +705,8 @@ async function uninstallApp() {
   } catch (error) {
     await dialog.showMessageBox(mainWindow, {
       type: 'error',
-      title: 'Uninstall failed',
-      message: 'Could not start the CodexBar uninstaller.',
+      title: '卸载失败',
+      message: '无法启动 CodexBar 卸载程序。',
       detail: error.message
     });
   }
@@ -744,12 +744,12 @@ async function showPortableUninstallHelp() {
   const portablePath = process.env.PORTABLE_EXECUTABLE_FILE || app.getPath('exe');
   const { response } = await dialog.showMessageBox(mainWindow, {
     type: 'info',
-    buttons: ['Open Apps Settings', 'OK'],
+    buttons: ['打开应用设置', '确定'],
     defaultId: 1,
     cancelId: 1,
-    title: 'Uninstall CodexBar',
-    message: 'No installed CodexBar uninstaller was found.',
-    detail: `If you are using the portable version, quit CodexBar and delete the downloaded exe file.\n\nCurrent executable:\n${portablePath}`
+    title: '卸载 CodexBar',
+    message: '没有找到已安装版本的 CodexBar 卸载程序。',
+    detail: `如果你使用的是便携版，请先退出 CodexBar，然后删除下载的 exe 文件。\n\n当前程序位置：\n${portablePath}`
   });
 
   if (response === 0) {
