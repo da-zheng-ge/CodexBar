@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="CodexBar icon">
+  <defs>
+    <linearGradient id="bg" x1="40" y1="24" x2="216" y2="232" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#20251f"/>
+      <stop offset="1" stop-color="#101410"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="72" y1="178" x2="184" y2="178" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2fdc72"/>
+      <stop offset="1" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
+  <path d="M72 105 45 128l27 23" fill="none" stroke="#eef2eb" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m184 105 27 23-27 23" fill="none" stroke="#eef2eb" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M143 79 113 177" fill="none" stroke="#aab2a5" stroke-width="18" stroke-linecap="round"/>
+  <rect x="68" y="186" width="120" height="22" rx="11" fill="#2a322a"/>
+  <rect x="68" y="186" width="82" height="22" rx="11" fill="url(#bar)"/>
+  <circle cx="183" cy="197" r="11" fill="#2fdc72"/>
+</svg>

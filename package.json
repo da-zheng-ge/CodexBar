@@ -23,6 +23,7 @@
       "package.json"
     ],
     "win": {
+      "icon": "src/tray.ico",
       "target": [
         {
           "target": "portable",

@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, Menu, Tray, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, Menu, Tray, ipcMain, screen, dialog, shell } = require('electron');
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -662,12 +662,98 @@ function createTray() {
   contextMenu = Menu.buildFromTemplate([
     { label: 'Refresh', click: () => usageService.refresh() },
     { type: 'separator' },
+    { label: 'Uninstall...', click: () => uninstallApp() },
+    { type: 'separator' },
     { label: 'Quit', click: () => app.quit() }
   ]);
 
   if (tray) {
     tray.setToolTip('CodexBar');
     tray.setContextMenu(contextMenu);
+  }
+}
+
+async function uninstallApp() {
+  const uninstaller = findUninstaller();
+  if (!uninstaller) {
+    await showPortableUninstallHelp();
+    return;
+  }
+
+  const { response } = await dialog.showMessageBox(mainWindow, {
+    type: 'warning',
+    buttons: ['Uninstall', 'Cancel'],
+    defaultId: 1,
+    cancelId: 1,
+    title: 'Uninstall CodexBar',
+    message: 'Uninstall CodexBar?',
+    detail: 'CodexBar will close and start the Windows uninstaller.'
+  });
+
+  if (response !== 0) {
+    return;
+  }
+
+  try {
+    const child = spawn(uninstaller, [], {
+      detached: true,
+      stdio: 'ignore',
+      windowsHide: false
+    });
+    child.unref();
+    app.quit();
+  } catch (error) {
+    await dialog.showMessageBox(mainWindow, {
+      type: 'error',
+      title: 'Uninstall failed',
+      message: 'Could not start the CodexBar uninstaller.',
+      detail: error.message
+    });
+  }
+}
+
+function findUninstaller() {
+  if (!app.isPackaged) {
+    return null;
+  }
+
+  const appDir = path.dirname(process.execPath);
+  const candidates = [
+    path.join(appDir, 'Uninstall CodexBar.exe'),
+    path.join(appDir, `Uninstall ${app.getName()}.exe`)
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate !== process.execPath && fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  try {
+    const uninstallers = fs.readdirSync(appDir)
+      .filter((name) => /^uninstall.*\.exe$/i.test(name))
+      .map((name) => path.join(appDir, name))
+      .filter((candidate) => candidate !== process.execPath);
+    return uninstallers[0] || null;
+  } catch {
+    return null;
+  }
+}
+
+async function showPortableUninstallHelp() {
+  const portablePath = process.env.PORTABLE_EXECUTABLE_FILE || app.getPath('exe');
+  const { response } = await dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    buttons: ['Open Apps Settings', 'OK'],
+    defaultId: 1,
+    cancelId: 1,
+    title: 'Uninstall CodexBar',
+    message: 'No installed CodexBar uninstaller was found.',
+    detail: `If you are using the portable version, quit CodexBar and delete the downloaded exe file.\n\nCurrent executable:\n${portablePath}`
+  });
+
+  if (response === 0) {
+    shell.openExternal('ms-settings:appsfeatures');
   }
 }
 
