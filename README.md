@@ -1,5 +1,7 @@
 # CodexBar
 
+[English](README.en.md)
+
 CodexBar 是一个 Windows 专用的 Codex 任务栏额度条。它通过本机的 `codex app-server --stdio` 读取 Codex rate limits，并在 Windows 任务栏附近显示一个紧凑的置顶状态条。
 
 ## 安装
@@ -63,71 +65,3 @@ npm run dist
 - 点击状态条可展开查看重置时间。
 - 右键菜单支持刷新、重置位置和退出。
 - 应用不会读取 API keys、认证文件、提示词或回复内容。
-
----
-
-## English
-
-CodexBar is a Windows-only Electron taskbar quota bar for Codex. It reads local Codex rate limits through `codex app-server --stdio` and renders a compact always-on-top bar near the Windows taskbar.
-
-## Install
-
-### Option 1: Download with Codex (Recommended)
-
-Open Codex and ask it to download the latest CodexBar build:
-
-```text
-Download the latest portable CodexBar exe from https://github.com/da-zheng-ge/CodexBar/releases/latest and place it on my desktop.
-```
-
-Then double-click `CodexBar.0.1.0.exe`. The portable build does not require installation.
-
-### Option 2: Manual Download
-
-Go to [GitHub Releases](https://github.com/da-zheng-ge/CodexBar/releases/latest) and download the latest Windows build:
-
-- `CodexBar.0.1.0.exe`: portable build, no install required.
-- `CodexBar.Setup.0.1.0.exe`: Windows installer.
-
-### Requirements
-
-- Windows.
-- Codex Desktop installed and signed in.
-- `codex.exe` must be discoverable automatically or configured with `CODEX_PATH`.
-
-If Windows shows a security warning, choose to keep/run the app. The first public builds are unsigned.
-
-## Run from Source
-
-```powershell
-npm install
-npm start
-```
-
-Set `CODEX_PATH` if `codex.exe` is not discoverable:
-
-```powershell
-$env:CODEX_PATH = 'C:\path\to\codex.exe'
-npm start
-```
-
-## Build
-
-Create a local unpacked build:
-
-```powershell
-npm run pack
-```
-
-Create distributable Windows builds in `dist/`:
-
-```powershell
-npm run dist
-```
-
-## Behavior
-
-- Compact view: `5H xx% | 7D xx%`
-- Click the bar to expand reset times.
-- Right-click for refresh, reset position, and quit.
-- The app does not read API keys, auth files, prompts, or responses.
