@@ -10,9 +10,13 @@ const COLLAPSED_SIZE = { width: 540, height: 70 };
 const RIGHT_TASKBAR_SAFE_MARGIN = 260;
 const REFRESH_INTERVAL_MS = 30_000;
 const ACTIVITY_POLL_INTERVAL_MS = 1_500;
-const THINKING_STALE_MS = 30 * 60 * 1_000;
+const THINKING_STALE_MS = 2 * 60 * 60 * 1_000;
+const MAX_SESSION_FILES_TO_SCAN = 30;
 const TASKBAR_GUARD_INTERVAL_MS = 2_500;
 const DEV_RELOAD_DEBOUNCE_MS = 350;
+const GITHUB_REPO_URL = 'https://github.com/da-zheng-ge/CodexBar';
+const GITHUB_LATEST_RELEASE_URL = `${GITHUB_REPO_URL}/releases/latest`;
+const GITHUB_LATEST_RELEASE_API_URL = 'https://api.github.com/repos/da-zheng-ge/CodexBar/releases/latest';
 
 let mainWindow;
 let usageService;
@@ -22,6 +26,7 @@ let taskbarGuard;
 let devReloadTimer;
 let devReloadWatcher;
 let isRelaunching = false;
+let isCheckingForUpdates = false;
 let taskbarAttachMode = 'fallback';
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 
@@ -231,30 +236,38 @@ function timestampOrNull(value) {
 }
 
 function getCodexThinkingState() {
-  const sessionFile = getLatestSessionFile();
-  if (!sessionFile) {
+  const sessionFiles = getRecentSessionFiles();
+  if (!sessionFiles.length) {
     return false;
   }
 
-  const activity = readSessionActivity(sessionFile);
-  if (!activity || !activity.lastTaskStartedAt) {
-    return false;
+  const now = Date.now();
+  for (const sessionFile of sessionFiles) {
+    const activity = readSessionActivity(sessionFile.path);
+    if (!activity || !activity.lastTaskStartedAt) {
+      continue;
+    }
+
+    const latestSignalAt = Math.max(activity.lastTaskStartedAt, activity.lastActivityAt, sessionFile.mtimeMs);
+    if (now - latestSignalAt > THINKING_STALE_MS) {
+      continue;
+    }
+
+    if (!activity.lastTaskEndedAt || activity.lastTaskStartedAt > activity.lastTaskEndedAt) {
+      return true;
+    }
   }
 
-  if (Date.now() - activity.lastTaskStartedAt > THINKING_STALE_MS) {
-    return false;
-  }
-
-  return !activity.lastTaskEndedAt || activity.lastTaskStartedAt > activity.lastTaskEndedAt;
+  return false;
 }
 
-function getLatestSessionFile() {
+function getRecentSessionFiles() {
   const sessionsRoot = path.join(process.env.USERPROFILE || '', '.codex', 'sessions');
   if (!fs.existsSync(sessionsRoot)) {
-    return null;
+    return [];
   }
 
-  let latest = null;
+  const files = [];
   const stack = [sessionsRoot];
   while (stack.length) {
     const current = stack.pop();
@@ -272,15 +285,15 @@ function getLatestSessionFile() {
       } else if (entry.isFile() && entry.name.endsWith('.jsonl')) {
         try {
           const stat = fs.statSync(fullPath);
-          if (!latest || stat.mtimeMs > latest.mtimeMs) {
-            latest = { path: fullPath, mtimeMs: stat.mtimeMs };
-          }
+          files.push({ path: fullPath, mtimeMs: stat.mtimeMs });
         } catch {}
       }
     }
   }
 
-  return latest && latest.path;
+  return files
+    .sort((a, b) => b.mtimeMs - a.mtimeMs)
+    .slice(0, MAX_SESSION_FILES_TO_SCAN);
 }
 
 function readSessionActivity(sessionFile) {
@@ -304,18 +317,20 @@ function readSessionActivity(sessionFile) {
 
   let lastTaskStartedAt = 0;
   let lastTaskEndedAt = 0;
+  let lastActivityAt = 0;
   for (const line of content.split(/\r?\n/)) {
+    const timestamp = Date.parse(matchJsonString(line, '"timestamp":"') || '');
+    if (!Number.isFinite(timestamp)) {
+      continue;
+    }
+
+    lastActivityAt = timestamp;
     if (!line.includes('"type":"event_msg"') || !line.includes('"payload":{"type":"')) {
       continue;
     }
 
     const payloadType = matchJsonString(line, '"payload":{"type":"');
     if (!payloadType) {
-      continue;
-    }
-
-    const timestamp = Date.parse(matchJsonString(line, '"timestamp":"') || '');
-    if (!Number.isFinite(timestamp)) {
       continue;
     }
 
@@ -326,7 +341,7 @@ function readSessionActivity(sessionFile) {
     }
   }
 
-  return { lastTaskStartedAt, lastTaskEndedAt };
+  return { lastTaskStartedAt, lastTaskEndedAt, lastActivityAt };
 }
 
 function matchJsonString(line, prefix) {
@@ -660,7 +675,11 @@ function createTray() {
   const icon = path.join(__dirname, 'tray.ico');
   tray = fs.existsSync(icon) ? new Tray(icon) : null;
   contextMenu = Menu.buildFromTemplate([
+    { label: `CodexBar v${app.getVersion()}`, enabled: false },
+    { type: 'separator' },
     { label: '刷新', click: () => usageService.refresh() },
+    { label: '检查更新', click: () => checkForUpdates() },
+    { label: 'GitHub 项目主页', click: () => shell.openExternal(GITHUB_REPO_URL) },
     { type: 'separator' },
     { label: '卸载', click: () => uninstallApp() },
     { type: 'separator' },
@@ -671,6 +690,103 @@ function createTray() {
     tray.setToolTip('CodexBar');
     tray.setContextMenu(contextMenu);
   }
+}
+
+async function checkForUpdates() {
+  if (isCheckingForUpdates) {
+    return;
+  }
+
+  isCheckingForUpdates = true;
+  try {
+    const latestRelease = await fetchLatestRelease();
+    const latestVersion = normalizeVersion(latestRelease.tag_name || latestRelease.name);
+    const currentVersion = normalizeVersion(app.getVersion());
+
+    if (!latestVersion) {
+      throw new Error('GitHub latest release did not include a valid version.');
+    }
+
+    if (compareVersions(latestVersion, currentVersion) > 0) {
+      const { response } = await dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        buttons: ['打开下载页', '稍后'],
+        defaultId: 0,
+        cancelId: 1,
+        title: '发现新版本',
+        message: `CodexBar ${latestVersion} 已发布。`,
+        detail: `当前版本：${currentVersion}\n最新版本：${latestVersion}`
+      });
+
+      if (response === 0) {
+        shell.openExternal(latestRelease.html_url || GITHUB_LATEST_RELEASE_URL);
+      }
+      return;
+    }
+
+    await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      buttons: ['确定'],
+      title: '已是最新版本',
+      message: `CodexBar v${currentVersion} 已是最新版本。`
+    });
+  } catch (error) {
+    const { response } = await dialog.showMessageBox(mainWindow, {
+      type: 'error',
+      buttons: ['打开下载页', '确定'],
+      defaultId: 1,
+      cancelId: 1,
+      title: '检查更新失败',
+      message: '无法检查 CodexBar 更新。',
+      detail: error.message
+    });
+
+    if (response === 0) {
+      shell.openExternal(GITHUB_LATEST_RELEASE_URL);
+    }
+  } finally {
+    isCheckingForUpdates = false;
+  }
+}
+
+async function fetchLatestRelease() {
+  const response = await fetch(GITHUB_LATEST_RELEASE_API_URL, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': `CodexBar/${app.getVersion()}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`GitHub returned ${response.status}.`);
+  }
+
+  return response.json();
+}
+
+function normalizeVersion(value) {
+  if (!value) {
+    return '';
+  }
+
+  const match = String(value).match(/\d+(?:\.\d+){0,2}/);
+  return match ? match[0] : '';
+}
+
+function compareVersions(left, right) {
+  const leftParts = left.split('.').map((part) => Number.parseInt(part, 10) || 0);
+  const rightParts = right.split('.').map((part) => Number.parseInt(part, 10) || 0);
+  const length = Math.max(leftParts.length, rightParts.length, 3);
+
+  for (let index = 0; index < length; index += 1) {
+    const leftPart = leftParts[index] || 0;
+    const rightPart = rightParts[index] || 0;
+    if (leftPart !== rightPart) {
+      return leftPart > rightPart ? 1 : -1;
+    }
+  }
+
+  return 0;
 }
 
 async function uninstallApp() {
@@ -743,17 +859,62 @@ function findUninstaller() {
 async function showPortableUninstallHelp() {
   const portablePath = process.env.PORTABLE_EXECUTABLE_FILE || app.getPath('exe');
   const { response } = await dialog.showMessageBox(mainWindow, {
-    type: 'info',
-    buttons: ['打开应用设置', '确定'],
-    defaultId: 1,
-    cancelId: 1,
+    type: 'warning',
+    buttons: ['删除并退出', '打开所在位置', '取消'],
+    defaultId: 2,
+    cancelId: 2,
     title: '卸载 CodexBar',
-    message: '没有找到已安装版本的 CodexBar 卸载程序。',
-    detail: `如果你使用的是便携版，请先退出 CodexBar，然后删除下载的 exe 文件。\n\n当前程序位置：\n${portablePath}`
+    message: '当前运行的是 CodexBar 便携版。',
+    detail: `将退出 CodexBar，并删除当前 exe 文件。\n\n当前程序位置：\n${portablePath}`
   });
 
   if (response === 0) {
-    shell.openExternal('ms-settings:appsfeatures');
+    deletePortableExecutableAfterExit(portablePath);
+    app.quit();
+  } else if (response === 1) {
+    shell.showItemInFolder(portablePath);
+  }
+}
+
+function deletePortableExecutableAfterExit(portablePath) {
+  const script = [
+    '$target = $env:CODEXBAR_DELETE_TARGET',
+    '$pidToWait = [int]$env:CODEXBAR_DELETE_PID',
+    'Wait-Process -Id $pidToWait -ErrorAction SilentlyContinue',
+    'Start-Sleep -Milliseconds 500',
+    'if ($target -and (Test-Path -LiteralPath $target -PathType Leaf)) {',
+    '  Remove-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue',
+    '}'
+  ].join('; ');
+
+  try {
+    const child = spawn('powershell.exe', [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-WindowStyle',
+      'Hidden',
+      '-Command',
+      script
+    ], {
+      detached: true,
+      stdio: 'ignore',
+      windowsHide: true,
+      env: {
+        ...process.env,
+        CODEXBAR_DELETE_TARGET: portablePath,
+        CODEXBAR_DELETE_PID: String(process.pid)
+      }
+    });
+    child.unref();
+  } catch (error) {
+    dialog.showMessageBox(mainWindow, {
+      type: 'error',
+      buttons: ['确定'],
+      title: '删除失败',
+      message: '无法安排删除 CodexBar 便携版文件。',
+      detail: error.message
+    });
   }
 }
 

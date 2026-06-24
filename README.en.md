@@ -60,4 +60,4 @@ npm run dist
 
 ## Behavior
 
-- Right-click for refresh and quit.
+- Right-click to view the current version, refresh, check for updates, open the GitHub project page, uninstall, and quit.
