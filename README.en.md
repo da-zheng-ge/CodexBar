@@ -11,16 +11,16 @@ CodexBar is a Windows-only Electron taskbar quota bar for Codex. It reads local 
 Open Codex and ask it to download the latest CodexBar build:
 
 ```text
-Download the latest portable CodexBar exe from https://github.com/da-zheng-ge/CodexBar/releases/latest and place it on my desktop.
+Open https://github.com/da-zheng-ge/CodexBar/releases/latest and download the latest portable CodexBar exe. Ask me where to save it.
 ```
 
-Then double-click `CodexBar.x.y.z.exe`. The portable build does not require installation.
+Then double-click `CodexBar-Portable.exe`. The portable build does not require installation.
 
 ### Option 2: Manual Download
 
 Go to [GitHub Releases](https://github.com/da-zheng-ge/CodexBar/releases/latest) and download the latest Windows portable build:
 
-- `CodexBar.x.y.z.exe`: portable build, no install required.
+- `CodexBar-Portable.exe`: portable build, no install required.
 
 ### Requirements
 
