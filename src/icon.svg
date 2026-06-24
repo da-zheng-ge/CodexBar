@@ -1,19 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="CodexBar icon">
   <defs>
-    <linearGradient id="bg" x1="40" y1="24" x2="216" y2="232" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#20251f"/>
-      <stop offset="1" stop-color="#101410"/>
+    <linearGradient id="tile" x1="36" y1="24" x2="220" y2="232" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f8fbff"/>
+      <stop offset="1" stop-color="#dfefff"/>
     </linearGradient>
-    <linearGradient id="bar" x1="72" y1="178" x2="184" y2="178" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2fdc72"/>
-      <stop offset="1" stop-color="#10b981"/>
+    <linearGradient id="ring" x1="56" y1="56" x2="204" y2="204" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0f8fd6"/>
+      <stop offset="1" stop-color="#20c66c"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="72" y1="184" x2="184" y2="184" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#19b6e7"/>
+      <stop offset="1" stop-color="#20c66c"/>
     </linearGradient>
   </defs>
-  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
-  <path d="M72 105 45 128l27 23" fill="none" stroke="#eef2eb" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="m184 105 27 23-27 23" fill="none" stroke="#eef2eb" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M143 79 113 177" fill="none" stroke="#aab2a5" stroke-width="18" stroke-linecap="round"/>
-  <rect x="68" y="186" width="120" height="22" rx="11" fill="#2a322a"/>
-  <rect x="68" y="186" width="82" height="22" rx="11" fill="url(#bar)"/>
-  <circle cx="183" cy="197" r="11" fill="#2fdc72"/>
+  <rect x="12" y="12" width="232" height="232" rx="52" fill="url(#tile)"/>
+  <rect x="12" y="12" width="232" height="232" rx="52" fill="none" stroke="#b7d3e8" stroke-width="8"/>
+  <path d="M169 82a66 66 0 1 0 2 90" fill="none" stroke="url(#ring)" stroke-width="26" stroke-linecap="round"/>
+  <path d="M118 128h72" fill="none" stroke="#172032" stroke-width="22" stroke-linecap="round"/>
+  <path d="m164 101 31 27-31 27" fill="none" stroke="#172032" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="68" y="183" width="120" height="24" rx="12" fill="#c8d6e3"/>
+  <rect x="68" y="183" width="88" height="24" rx="12" fill="url(#bar)"/>
 </svg>
