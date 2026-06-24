@@ -8,13 +8,13 @@ CodexBar is a Windows-only Electron taskbar quota bar for Codex. It reads local 
 
 ### Option 1: Download with Codex (Recommended)
 
-Open Codex and ask it to download the latest CodexBar build:
+Open Codex and ask it to download and run the latest CodexBar build:
 
 ```text
-Open https://github.com/da-zheng-ge/CodexBar/releases/latest and download the latest portable CodexBar exe. Ask me where to save it.
+Open https://github.com/da-zheng-ge/CodexBar/releases/latest and download the latest portable CodexBar exe to the default Downloads folder, then run it after the download finishes.
 ```
 
-Then double-click `CodexBar-Portable.exe`. The portable build does not require installation.
+Codex will download and launch `CodexBar-Portable.exe`. The portable build does not require installation.
 
 ### Option 2: Manual Download
 

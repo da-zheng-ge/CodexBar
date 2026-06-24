@@ -44,11 +44,6 @@ body {
   transition: background-color 120ms ease, border-radius 120ms ease;
 }
 
-.bar:hover .player-shell {
-  border-radius: 12px;
-  background: var(--surface);
-}
-
 .brand {
   display: inline-flex;
   align-items: center;
