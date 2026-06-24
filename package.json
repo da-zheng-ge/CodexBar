@@ -10,7 +10,7 @@
     "start": "electron .",
     "check": "node --check src/main.js && node --check src/preload.js && node --check src/renderer.js && node --check src/win32.js",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --win portable nsis"
+    "dist": "electron-builder --win portable"
   },
   "build": {
     "appId": "com.codexbar.app",
@@ -30,19 +30,8 @@
           "arch": [
             "x64"
           ]
-        },
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
         }
       ]
-    },
-    "nsis": {
-      "artifactName": "${productName}-Setup.${ext}",
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
     },
     "portable": {
       "artifactName": "${productName}-Portable.${ext}"
