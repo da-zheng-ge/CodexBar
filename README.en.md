@@ -18,10 +18,9 @@ Then double-click `CodexBar.x.y.z.exe`. The portable build does not require inst
 
 ### Option 2: Manual Download
 
-Go to [GitHub Releases](https://github.com/da-zheng-ge/CodexBar/releases/latest) and download the latest Windows build:
+Go to [GitHub Releases](https://github.com/da-zheng-ge/CodexBar/releases/latest) and download the latest Windows portable build:
 
 - `CodexBar.x.y.z.exe`: portable build, no install required.
-- `CodexBar.Setup.x.y.z.exe`: Windows installer.
 
 ### Requirements
 
