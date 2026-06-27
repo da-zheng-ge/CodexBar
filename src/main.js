@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { attachAsTaskbarChild, attachToTaskbar, applyNoActivateToolWindow, repairNoActivateToolWindow, getWindowState, getTaskbarAttachInfo, getTaskbarRect, keepAboveTaskbar, moveTaskbarChild } = require('./win32');
 
-const COLLAPSED_SIZE = { width: 540, height: 70 };
+const COLLAPSED_SIZE = { width: 472, height: 70 };
 const RIGHT_TASKBAR_SAFE_MARGIN = 260;
 const REFRESH_INTERVAL_MS = 30_000;
 const ACTIVITY_POLL_INTERVAL_MS = 1_500;
